@@ -79,11 +79,14 @@ public class Cifrador {
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(res)); 
             ImageIO.write(image, "BMP", new File(op+archivo.getName().substring(0, archivo.getName().length()-4)+modo+".bmp")); 
             
+            return true;
+            
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
         
-        return true;
+        return false;
     }
     
     /**
