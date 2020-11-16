@@ -10,7 +10,7 @@ public class UiAlicia extends JFrame{
 
 	private static final int CIFRAR = 0;
 	private static final int DECIFRAR = 1;
-	private static final String[] MODOS = new String[]{"Modo de operacion","CBC", "CFB", "CTR", "CTS", "ECB", "OFB", "PCBC"};
+	private static final String[] MODOS = new String[]{"Modo de operacion","ECB", "CBC", "CFB", "OFB"};
 	
 	private JLabel lblTitulo;
 	private JLabel lblNombreArchivo;

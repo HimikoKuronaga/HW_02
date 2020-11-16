@@ -69,7 +69,10 @@ public class Cifrador {
             if( op == 0 )
                 cifrador.init(Cipher.ENCRYPT_MODE, llave);
             else{
-                cifrador.init(Cipher.DECRYPT_MODE, llave, new IvParameterSpec(new byte[16]));
+				if( modo.equals("CBC") || modo.equals("CFB") || modo.equals("OFB") )
+	                cifrador.init(Cipher.DECRYPT_MODE, llave, new IvParameterSpec(new byte[16]));
+				else
+					cifrador.init(Cipher.DECRYPT_MODE, llave);
 			}
             
             //Se obtienen los datos cifrados o descifrados
@@ -82,7 +85,7 @@ public class Cifrador {
             
             //Se guarda la imagen
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(res)); 
-            ImageIO.write(image, "BMP", new File(op+archivo.getName().substring(0, archivo.getName().length()-4)+modo+".bmp"));     
+           // ImageIO.write(image, "BMP", new File(op+archivo.getName().substring(0, archivo.getName().length()-4)+modo+".bmp"));     
             if( op == 0 )
                 ImageIO.write(image, "BMP", new File("./Archivos/"+modo+"-cifrado.bmp")); 
             else
