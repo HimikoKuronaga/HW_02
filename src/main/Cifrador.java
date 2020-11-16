@@ -68,7 +68,6 @@ public class Cifrador {
             if( op == 0 )
                 cifrador.init(Cipher.ENCRYPT_MODE, llave);
             else{
-				System.out.println(llave);
                 cifrador.init(Cipher.DECRYPT_MODE, llave);
 			}
 
@@ -144,12 +143,12 @@ public class Cifrador {
      * @param fileName
      * @return 
      */
-    public SecretKey loadKey(String fileName){
+    public SecretKey loadKey( /*String filename*/ File f){
         SecretKeySpec keyspec = null;       
         try {
-            File keyfile = new File(fileName+".key");
-            DataInputStream input = new DataInputStream(new FileInputStream(keyfile));
-            byte[] rawkey = new byte[ (int) keyfile.length()];
+            //File keyfile = new File(fileName+".key");
+            DataInputStream input = new DataInputStream(new FileInputStream( f ));
+            byte[] rawkey = new byte[ (int) /*keyfile*/f.length()];
             input.readFully(rawkey);
             input.close();
             keyspec = new SecretKeySpec(rawkey, "AES");
