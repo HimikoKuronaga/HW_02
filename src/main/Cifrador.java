@@ -46,6 +46,9 @@ public class Cifrador {
                 leido = leido + l;
             }
             
+            fis.close();
+            bos.close();
+
             //Imagen en bytes
             byte[] bytes = bos.toByteArray();
             
