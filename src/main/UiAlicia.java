@@ -1,3 +1,4 @@
+
 import java.io.File;
 import java.awt.*;
 import java.awt.event.*;
@@ -14,6 +15,7 @@ public class UiAlicia extends JFrame{
 	private JLabel lblTitulo;
 	private JLabel lblNombreArchivo;
 	private JButton btnSeleccionar;
+	private JButton btnSeleccionarLlave;
 	
 	private JLabel lblLlave;
 	private JTextField txtLlave;
@@ -26,6 +28,7 @@ public class UiAlicia extends JFrame{
 	
 	private boolean seleccionado;
 	private boolean llaveSeleccionada;
+	private boolean seleccionadoLlave;
 	private JFileChooser fc;
 	private File archivo;
 	private File archivoLlave;
@@ -69,10 +72,18 @@ public class UiAlicia extends JFrame{
 		});
 		
 		lblLlave = new JLabel("Nombre de llave:");
-		txtLlave = new JTextField(10);
+		txtLlave = new JTextField( 10 );
+
+		btnOperacion = new JButton("Cifrar/Decifrar");
+		btnOperacion.addActionListener( new ActionListener(){
+			public void actionPerformed( ActionEvent e ){
+				accionCifrar();
+			}	
+		});
 		
 		cbxCifrar = new JCheckBox("Cifrar");
 		cbxCifrar.addItemListener(new ItemListener(){
+		
 			public void itemStateChanged( ItemEvent e){
 				if( e.getStateChange() == 1){
 					operacion = CIFRAR;
@@ -112,13 +123,6 @@ public class UiAlicia extends JFrame{
 			}
 		});
 
-		btnOperacion = new JButton("Cifrar/Descifrar");
-		btnOperacion.addActionListener( new ActionListener(){
-			public void actionPerformed( ActionEvent e ){
-				accionCifrar();
-			}	
-		});
-
 		panelSuperior.add( lblTitulo);
 		panelArchivo.add( lblNombreArchivo );
 		panelArchivo.add( btnSeleccionar );
@@ -133,7 +137,7 @@ public class UiAlicia extends JFrame{
 					.addComponent( cmbModos )
 					.addComponent( btnOperacion )	
 				)
-				.addGroup(gl.createParallelGroup(GroupLayout.Alignment.TRAILING)
+				.addGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING)
 					.addComponent( txtLlave )
 					.addComponent( cbxDecifrar )
 					.addComponent( btnElegirLlave )
@@ -175,7 +179,7 @@ public class UiAlicia extends JFrame{
 	}
 
 	public void accionSeleccionar(){
-		fc = new JFileChooser("./../../Archivos");
+		fc = new JFileChooser("./Archivos");
 		if(fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION){
 			archivo = fc.getSelectedFile();
 			seleccionado = true;
@@ -211,17 +215,17 @@ public class UiAlicia extends JFrame{
 
 	public void accionCifrar(){
 		if(!seleccionado){
-			JOptionPane.showMessageDialog(null, "Primero debes seleccionar un archivo", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "Primero debes seleccionar un archivo", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
 		if( operacion == -1){
-			JOptionPane.showMessageDialog(null, "Debes seleccionar una operacion", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "Debes seleccionar una operacion", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
 		if( cmbModos.getSelectedIndex() == 0){
-			JOptionPane.showMessageDialog(null,"Debes seleccionar un modo de operacion", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this,"Debes seleccionar un modo de operacion", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		
@@ -231,9 +235,8 @@ public class UiAlicia extends JFrame{
 		}
 
 		SecretKey llave = cd.loadKey( archivoLlave );
-
 		if( cd.cifrarDescifrarImg( llave, modo, operacion, archivo) ){
-			JOptionPane.showMessageDialog(null,"Imagen procesada", "Ok", JOptionPane.OK_OPTION);
+			JOptionPane.showMessageDialog(null,"Imagen procesada", "Ok", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}else{
 			JOptionPane.showMessageDialog(null,"Error al procesar imagen", "Error", JOptionPane.ERROR_MESSAGE);
@@ -241,15 +244,12 @@ public class UiAlicia extends JFrame{
 		}
 	}
 
-
-
 	public static void main(String[] args){	
-			SwingUtilities.invokeLater(new Runnable(){
-				public void run(){
-					UiAlicia alicia = new UiAlicia();
-
-				}	
-			});
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+				UiAlicia alicia = new UiAlicia();
+			}	
+		});
 	}
 
 }

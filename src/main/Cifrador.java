@@ -1,6 +1,4 @@
 
-//package main;
-
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,6 +11,7 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.spec.IvParameterSpec;
 import javax.imageio.ImageIO;
 
 public class Cifrador {
@@ -48,7 +47,9 @@ public class Cifrador {
                 bos.write(b, 0, l);
                 leido = leido + l;
             }
-                  
+            
+            fis.close();
+            bos.close();
             //Imagen en bytes
             byte[] bytes = bos.toByteArray();
            
@@ -68,14 +69,12 @@ public class Cifrador {
             if( op == 0 )
                 cifrador.init(Cipher.ENCRYPT_MODE, llave);
             else{
-                cifrador.init(Cipher.DECRYPT_MODE, llave);
+                cifrador.init(Cipher.DECRYPT_MODE, llave, new IvParameterSpec(new byte[16]));
 			}
-
             
             //Se obtienen los datos cifrados o descifrados
             byte []dataC = cifrador.doFinal(data);
-           // System.out.println(Arrays.toString(dataC));
-            
+           // System.out.println(Arrays.toString(dataC));            
             //Se recontruye la imagen bmp con la cabecera y la parte de datos
             byte res[] = new byte[bytes.length];
             System.arraycopy(cabecera, 0, res, 0, cabecera.length);
@@ -84,13 +83,16 @@ public class Cifrador {
             //Se guarda la imagen
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(res)); 
             ImageIO.write(image, "BMP", new File(op+archivo.getName().substring(0, archivo.getName().length()-4)+modo+".bmp"));     
-            
+            if( op == 0 )
+                ImageIO.write(image, "BMP", new File("./Archivos/"+modo+"-cifrado.bmp")); 
+            else
+                ImageIO.write(image, "BMP", new File("./Archivos/"+modo+"-descifrado.bmp")); 
+          
 			return true;
-		} catch (Exception e) {
+		}catch (Exception e) {
             e.printStackTrace();
         }
-        
-        return false;
+        return true;
     }
 
     /*
@@ -143,18 +145,18 @@ public class Cifrador {
      * @param fileName
      * @return 
      */
-    public SecretKey loadKey( /*String filename*/ File f){
-        SecretKeySpec keyspec = null;       
+    public SecretKey loadKey(File keyfile){
+        SecretKeySpec keyspec = null;
         try {
-            //File keyfile = new File(fileName+".key");
-            DataInputStream input = new DataInputStream(new FileInputStream( f ));
-            byte[] rawkey = new byte[ (int) /*keyfile*/f.length()];
+            DataInputStream input = new DataInputStream(new FileInputStream(keyfile));
+            byte[] rawkey = new byte[ (int) keyfile.length()];
+
             input.readFully(rawkey);
             input.close();
             keyspec = new SecretKeySpec(rawkey, "AES");
         } catch (Exception e) {
         	e.printStackTrace();
-		}
+        }
         return keyspec;
      }
 }
