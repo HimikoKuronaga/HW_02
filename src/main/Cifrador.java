@@ -1,6 +1,4 @@
 
-package main;
-
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -76,7 +74,10 @@ public class Cifrador {
             
             //Se guarda la imagen
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(res)); 
-            ImageIO.write(image, "BMP", new File(archivo.getName().substring(0, archivo.getName().length()-4)+modo+".bmp")); 
+            if( op == 0 )
+                ImageIO.write(image, "BMP", new File("./Archivos/"+modo+"-cifrado.bmp")); 
+            else
+                ImageIO.write(image, "BMP", new File("./Archivos/"+modo+"-descifrado.bmp")); 
             
             return true;
             
@@ -141,12 +142,11 @@ public class Cifrador {
      * @param fileName
      * @return 
      */
-    public SecretKey loadKey(String fileName){
+    public SecretKey loadKey(File keyfile){
         
         SecretKeySpec keyspec = null;
         
         try {
-            File keyfile = new File(fileName+".key");
             DataInputStream input = new DataInputStream(new FileInputStream(keyfile));
             byte[] rawkey = new byte[ (int) keyfile.length()];
             input.readFully(rawkey);
@@ -154,6 +154,7 @@ public class Cifrador {
 
             keyspec = new SecretKeySpec(rawkey, "AES");
         } catch (Exception e) {
+            e.printStackTrace();
         }
         
         return keyspec;
