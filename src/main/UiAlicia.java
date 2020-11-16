@@ -31,9 +31,9 @@ public class UiAlicia extends JFrame{
 	private int operacion;
 	
 	public UiAlicia(){
-		setTitle("Alicia");	
+		setTitle("Practica 3, Criptografia.");	
 		setSize(620, 240);	
-		setVisible(true);
+		setLocationRelativeTo(null);
 		operacion = -1;
 		seleccionado = false;
 		cd = new Cifrador();
@@ -44,6 +44,7 @@ public class UiAlicia extends JFrame{
 			}
 		});
 		init();
+		setVisible(true);
 	}
 
 	void init(){
@@ -62,7 +63,7 @@ public class UiAlicia extends JFrame{
 			}	
 		});
 		
-		btnOperacion = new JButton("Cifrar/Decifrar");
+		btnOperacion = new JButton("Cifrar/Descifrar");
 		btnOperacion.addActionListener( new ActionListener(){
 			public void actionPerformed( ActionEvent e ){
 				accionCifrar();
@@ -82,7 +83,7 @@ public class UiAlicia extends JFrame{
 			}
 		});
 
-		cbxDecifrar = new JCheckBox("Decifrar");
+		cbxDecifrar = new JCheckBox("Descifrar");
 		cbxDecifrar.addItemListener(new ItemListener(){
 			public void itemStateChanged( ItemEvent e){
 				if( e.getStateChange() == 1){
@@ -98,8 +99,6 @@ public class UiAlicia extends JFrame{
 				modo = ( String )cmbModos.getItemAt(cmbModos.getSelectedIndex());
 			}
 		});
-		
-		
 		
 		panelSuperior.add( lblTitulo);
 		panelArchivo.add( lblNombreArchivo );
@@ -172,20 +171,20 @@ public class UiAlicia extends JFrame{
 			JOptionPane.showMessageDialog(null,"Debes ingresar una llave", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		
-		if( !cd.generarLlave( txtLlave.getText() ) ){
+
+		if( !cd.generarLlave( txtLlave.getText() )){
 			JOptionPane.showMessageDialog(null,"Error al generar llave", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-
+		
 		SecretKey llave = cd.loadKey( txtLlave.getText() );
-		if( !cd.cifrarDescifrarImg( llave, modo, operacion, archivo) ){
-			JOptionPane.showMessageDialog(null,"Error al cifrar/descifrar imagen", "Error", JOptionPane.ERROR_MESSAGE);
+		if( cd.cifrarDescifrarImg( llave, modo, operacion, archivo) ){
+			JOptionPane.showMessageDialog(null,"Imagen procesada", "Ok", JOptionPane.OK_OPTION);
+			return;
+		}else{
+			JOptionPane.showMessageDialog(null,"Error al procesar imagen", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		
-		JOptionPane.showMessageDialog(null,"Imagen procesada", "Ok", JOptionPane.OK_OPTION);
-			return;
 	}
 
 	public void accionSeleccionar(){

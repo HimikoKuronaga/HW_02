@@ -19,7 +19,7 @@ public class Cifrador {
     
     //Constructor
     public Cifrador(){};
-    
+      
     /**
      * Cifra la imagen ingresada con el modo ingresado
      * @param llave : Llave de cifrado
@@ -34,6 +34,7 @@ public class Cifrador {
             //Flujo de datos de entrada
             FileInputStream fis = new FileInputStream(archivo);
             //Flujo de datos para almacenar los bytes
+            
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             
             long tamImg = archivo.length();
@@ -42,17 +43,20 @@ public class Cifrador {
             
             //Se lee la imagen
             while( leido != tamImg ){
-                byte [] b = new byte[54];
+                byte [] b = new byte[65535];
                 l = fis.read(b);
                 bos.write(b, 0, l);
                 leido = leido + l;
             }
-            
+                  
             //Imagen en bytes
             byte[] bytes = bos.toByteArray();
+           
+            //byte[] bytes = new byte[tamImg];
+            //fis.read( bytes );
             
             //Separar la cabecera y la parte de datos
-            byte[] cabecera = new byte[65535];
+            byte[] cabecera = new byte[54];
             byte[] data = new byte[bytes.length-54];
             
             System.arraycopy(bytes, 0, cabecera, 0, cabecera.length);
@@ -63,12 +67,15 @@ public class Cifrador {
             
             if( op == 0 )
                 cifrador.init(Cipher.ENCRYPT_MODE, llave);
-            else
+            else{
+				System.out.println(llave);
                 cifrador.init(Cipher.DECRYPT_MODE, llave);
+			}
+
             
             //Se obtienen los datos cifrados o descifrados
             byte []dataC = cifrador.doFinal(data);
-            System.out.println(Arrays.toString(dataC));
+           // System.out.println(Arrays.toString(dataC));
             
             //Se recontruye la imagen bmp con la cabecera y la parte de datos
             byte res[] = new byte[bytes.length];
@@ -77,38 +84,34 @@ public class Cifrador {
             
             //Se guarda la imagen
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(res)); 
-            ImageIO.write(image, "BMP", new File(op+archivo.getName().substring(0, archivo.getName().length()-4)+modo+".bmp")); 
+            ImageIO.write(image, "BMP", new File(op+archivo.getName().substring(0, archivo.getName().length()-4)+modo+".bmp"));     
             
-            return true;
-            
-        } catch (Exception e) {
+			return true;
+		} catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
         
         return false;
     }
-    
-    /**
+
+    /*
      * Genera una llave AES de 128 bits
      * @param nombreLlave : Nombre para el archivo de la llave .key
      * @return true cuando la llave se guarda con exito false cuando no
      */
+     
     public boolean generarLlave(String nombreLlave){
         //Generar una llave de 128 bits
             try {
                 //Generador para llave AES
                 KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
                 keyGenerator.init(128);
-                
                 SecretKey key = keyGenerator.generateKey();
                 saveKey(key, nombreLlave+".key");
-
+                return true;
             } catch (Exception e) {
                 e.printStackTrace();
-                return false;
             }
-            
             return true;
     }
     
@@ -121,10 +124,8 @@ public class Cifrador {
      */
     public boolean saveKey(SecretKey key, String fileName) throws Exception {
         byte[] secretKeyBytes = key.getEncoded();
-
         SecretKeySpec skey = new SecretKeySpec(secretKeyBytes, "AES");
         byte[] encoded = skey.getEncoded();
-        
         try {
             File keyfile = new File(fileName);
             FileOutputStream fos = new FileOutputStream(keyfile);
@@ -144,20 +145,17 @@ public class Cifrador {
      * @return 
      */
     public SecretKey loadKey(String fileName){
-        
-        SecretKeySpec keyspec = null;
-        
+        SecretKeySpec keyspec = null;       
         try {
             File keyfile = new File(fileName+".key");
             DataInputStream input = new DataInputStream(new FileInputStream(keyfile));
             byte[] rawkey = new byte[ (int) keyfile.length()];
             input.readFully(rawkey);
             input.close();
-
             keyspec = new SecretKeySpec(rawkey, "AES");
         } catch (Exception e) {
-        }
-        
+        	e.printStackTrace();
+		}
         return keyspec;
      }
 }
