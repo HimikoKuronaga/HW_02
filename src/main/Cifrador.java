@@ -1,5 +1,5 @@
 
-//package main;
+package main;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -42,7 +42,7 @@ public class Cifrador {
             
             //Se lee la imagen
             while( leido != tamImg ){
-                byte [] b = new byte[54];
+                byte [] b = new byte[65535];
                 l = fis.read(b);
                 bos.write(b, 0, l);
                 leido = leido + l;
@@ -52,7 +52,7 @@ public class Cifrador {
             byte[] bytes = bos.toByteArray();
             
             //Separar la cabecera y la parte de datos
-            byte[] cabecera = new byte[65535];
+            byte[] cabecera = new byte[54];
             byte[] data = new byte[bytes.length-54];
             
             System.arraycopy(bytes, 0, cabecera, 0, cabecera.length);
@@ -68,7 +68,6 @@ public class Cifrador {
             
             //Se obtienen los datos cifrados o descifrados
             byte []dataC = cifrador.doFinal(data);
-            System.out.println(Arrays.toString(dataC));
             
             //Se recontruye la imagen bmp con la cabecera y la parte de datos
             byte res[] = new byte[bytes.length];
@@ -77,7 +76,7 @@ public class Cifrador {
             
             //Se guarda la imagen
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(res)); 
-            ImageIO.write(image, "BMP", new File(op+archivo.getName().substring(0, archivo.getName().length()-4)+modo+".bmp")); 
+            ImageIO.write(image, "BMP", new File(archivo.getName().substring(0, archivo.getName().length()-4)+modo+".bmp")); 
             
             return true;
             
@@ -85,8 +84,7 @@ public class Cifrador {
             e.printStackTrace();
             return false;
         }
-        
-        return false;
+         
     }
     
     /**
