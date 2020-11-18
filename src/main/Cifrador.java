@@ -27,9 +27,13 @@ public class Cifrador {
      * @param archivo : La imagen a cifrar
      * @return true si el archivo se cifro con exito false si no
      */
-    public boolean cifrarDescifrarImg( SecretKey llave, String modo, int op,  File archivo ){
+    public boolean cifrarDescifrarImg( SecretKey llave, String modo, int op, int tamBloque, File archivo ){
         
         try {
+            //Ya que los modos CFB y OFB necesaitan el vector de inicializacion se usa el siguiente vector
+            byte[] iv = new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF }; 
+            IvParameterSpec ivSpec = new IvParameterSpec(iv);
+
             //Flujo de datos de entrada
             FileInputStream fis = new FileInputStream(archivo);
             //Flujo de datos para almacenar los bytes
@@ -53,31 +57,53 @@ public class Cifrador {
             //Imagen en bytes
             byte[] bytes = bos.toByteArray();
            
-            //byte[] bytes = new byte[tamImg];
-            //fis.read( bytes );
-            
             //Separar la cabecera y la parte de datos
             byte[] cabecera = new byte[54];
             byte[] data = new byte[bytes.length-54];
             
+            //Cabecera
             System.arraycopy(bytes, 0, cabecera, 0, cabecera.length);
+            //Datos
             System.arraycopy(bytes, cabecera.length, data, 0, data.length);
        
             //Cifrar o Descifrar archivo
             Cipher cifrador = Cipher.getInstance("AES/"+modo+"/NoPadding");
             
             if( op == 0 )
-                cifrador.init(Cipher.ENCRYPT_MODE, llave);
+                if( modo.equals("CBC") || modo.equals("CFB") || modo.equals("OFB") )
+                    cifrador.init(Cipher.ENCRYPT_MODE, llave, ivSpec);
+                else
+                    cifrador.init(Cipher.ENCRYPT_MODE, llave );
             else{
 				if( modo.equals("CBC") || modo.equals("CFB") || modo.equals("OFB") )
-	                cifrador.init(Cipher.DECRYPT_MODE, llave, new IvParameterSpec(new byte[16]));
+	                cifrador.init(Cipher.DECRYPT_MODE, llave, ivSpec);
 				else
 					cifrador.init(Cipher.DECRYPT_MODE, llave);
-			}
+            }
             
+            bos = new ByteArrayOutputStream();
+            int noBloques = data.length/tamBloque;
+            
+            int i=0;
+            int aux=0;
+
+            //Inicia el cifrado por bloques
+
+            for(i=0; i<noBloques; i++){
+                //Bloque con los datos a cifrar
+                byte []bloque = new byte[tamBloque];
+
+                System.arraycopy(data, aux, bloque, 0, bloque.length);
+                //Bloque con los datos cifrados
+                byte []bloquec = cifrador.doFinal(bloque);
+
+                bos.write(bloquec, 0, bloquec.length);
+                aux = aux+tamBloque;
+            }
+
             //Se obtienen los datos cifrados o descifrados
-            byte []dataC = cifrador.doFinal(data);
-           // System.out.println(Arrays.toString(dataC));            
+            byte []dataC = bos.toByteArray();
+                    
             //Se recontruye la imagen bmp con la cabecera y la parte de datos
             byte res[] = new byte[bytes.length];
             System.arraycopy(cabecera, 0, res, 0, cabecera.length);
@@ -87,15 +113,63 @@ public class Cifrador {
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(res)); 
            // ImageIO.write(image, "BMP", new File(op+archivo.getName().substring(0, archivo.getName().length()-4)+modo+".bmp"));     
             if( op == 0 )
-                ImageIO.write(image, "BMP", new File("./Archivos/"+modo+"-cifrado.bmp")); 
+            {
+                String nomImg = archivo.getName().substring(0,archivo.getName().length()-4);
+                ImageIO.write(image, "BMP", new File("./Archivos/"+nomImg+"_"+modo+".bmp")); 
+            }
+                
             else
-                ImageIO.write(image, "BMP", new File("./Archivos/"+modo+"-descifrado.bmp")); 
+            {
+
+                ImageIO.write(image, "BMP", new File("./Archivos/"+archivo.getName()+"-descifrado.bmp")); 
+            }
+            
           
 			return true;
 		}catch (Exception e) {
             e.printStackTrace();
         }
         return true;
+    }
+
+    /**
+     * @param tamBloque tamaño del bloque
+     * @param data datos para ser cifrados
+     * @param key  llave para cifrar los datos
+     */
+    public byte[] ecDatos( int tamBloque, byte [] data , SecretKey key , String modo){
+        
+        byte datac[] = null;
+
+        try {
+            Cipher cifrador = Cipher.getInstance("AES/CBC/NoPadding");
+            cifrador.init(Cipher.ENCRYPT_MODE, key);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+            int noBloques = data.length/tamBloque;
+            int i=0;
+            int aux=0;
+
+            for(i=0; i<noBloques; i++){
+                //Bloque con los datos a cifrar
+                byte []bloque = new byte[tamBloque];
+
+                System.arraycopy(data, aux, bloque, 0, bloque.length);
+                //Bloque con los datos cifrados
+                byte []bloquec = cifrador.doFinal(bloque);
+
+                bos.write(bloquec, 0, bloquec.length);
+                aux = aux+tamBloque;
+            }
+
+            datac = bos.toByteArray();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+
+        return datac;
     }
 
     /*

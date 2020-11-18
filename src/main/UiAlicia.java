@@ -235,7 +235,8 @@ public class UiAlicia extends JFrame{
 		}
 
 		SecretKey llave = cd.loadKey( archivoLlave );
-		if( cd.cifrarDescifrarImg( llave, modo, operacion, archivo) ){
+		//System.out.println("K" + llave + " M " + modo + " Op " + operacion + " - " + archivo.getName());
+		if( cd.cifrarDescifrarImg( llave, modo, operacion, 16, archivo) ){
 			JOptionPane.showMessageDialog(null,"Imagen procesada", "Ok", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}else{
