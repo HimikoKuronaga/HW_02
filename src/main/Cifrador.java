@@ -120,7 +120,6 @@ public class Cifrador {
                 
             else
             {
-
                 ImageIO.write(image, "BMP", new File("./Archivos/"+archivo.getName()+"-descifrado.bmp")); 
             }
             
@@ -130,46 +129,6 @@ public class Cifrador {
             e.printStackTrace();
         }
         return true;
-    }
-
-    /**
-     * @param tamBloque tamaño del bloque
-     * @param data datos para ser cifrados
-     * @param key  llave para cifrar los datos
-     */
-    public byte[] ecDatos( int tamBloque, byte [] data , SecretKey key , String modo){
-        
-        byte datac[] = null;
-
-        try {
-            Cipher cifrador = Cipher.getInstance("AES/CBC/NoPadding");
-            cifrador.init(Cipher.ENCRYPT_MODE, key);
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
-            int noBloques = data.length/tamBloque;
-            int i=0;
-            int aux=0;
-
-            for(i=0; i<noBloques; i++){
-                //Bloque con los datos a cifrar
-                byte []bloque = new byte[tamBloque];
-
-                System.arraycopy(data, aux, bloque, 0, bloque.length);
-                //Bloque con los datos cifrados
-                byte []bloquec = cifrador.doFinal(bloque);
-
-                bos.write(bloquec, 0, bloquec.length);
-                aux = aux+tamBloque;
-            }
-
-            datac = bos.toByteArray();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
-
-        return datac;
     }
 
     /*
