@@ -11,14 +11,17 @@ public class UiAlicia extends JFrame{
 	private static final int CIFRAR = 0;
 	private static final int DECIFRAR = 1;
 	private static final String[] MODOS = new String[]{"Modo de operacion","ECB", "CBC", "CFB", "OFB"};
-	
+	private static final int DEF_TAM_BLOQUE = 16;
+
 	private JLabel lblTitulo;
 	private JLabel lblNombreArchivo;
 	private JButton btnSeleccionar;
 	private JButton btnSeleccionarLlave;
 	
 	private JLabel lblLlave;
+	private JLabel lblTamBloque;
 	private JTextField txtLlave;
+	private JTextField txtTamBloque;
 	private JCheckBox cbxCifrar;
 	private JCheckBox cbxDecifrar;
 	private JComboBox cmbModos;
@@ -36,7 +39,8 @@ public class UiAlicia extends JFrame{
 	private Cifrador cd;
 	private String modo;
 	private int operacion;
-	
+	private int tamBloque;
+
 	public UiAlicia(){
 		setTitle("Practica 3, Criptografia.");	
 		setSize(620, 240);	
@@ -45,6 +49,7 @@ public class UiAlicia extends JFrame{
 		seleccionado = false;
 		llaveSeleccionada = false;
 		cd = new Cifrador();
+		tamBloque = DEF_TAM_BLOQUE;
 		/*Cuando se cierra la ventana*/
 		addWindowListener(new WindowAdapter(){
 			public void windowClosing(WindowEvent e){
@@ -80,7 +85,10 @@ public class UiAlicia extends JFrame{
 				accionCifrar();
 			}	
 		});
-		
+
+		lblTamBloque = new JLabel("Tam de bloque:");
+		txtTamBloque = new JTextField(10);
+
 		cbxCifrar = new JCheckBox("Cifrar");
 		cbxCifrar.addItemListener(new ItemListener(){
 		
@@ -132,13 +140,15 @@ public class UiAlicia extends JFrame{
 		gl.setHorizontalGroup(
 			gl.createSequentialGroup()
 				.addGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING)
-					.addComponent( lblLlave )
-					.addComponent( cbxCifrar )
-					.addComponent( cmbModos )
-					.addComponent( btnOperacion )	
+					.addComponent( lblLlave ).addGap(2)
+					.addComponent( lblTamBloque ).addGap(2)
+					.addComponent( cbxCifrar ).addGap(2)
+					.addComponent( cmbModos ).addGap(2)
+					.addComponent( btnOperacion ).addGap(2)	
 				)
 				.addGroup(gl.createParallelGroup(GroupLayout.Alignment.LEADING)
 					.addComponent( txtLlave )
+					.addComponent( txtTamBloque )
 					.addComponent( cbxDecifrar )
 					.addComponent( btnElegirLlave )
 					.addComponent( btnGenerar )
@@ -153,7 +163,13 @@ public class UiAlicia extends JFrame{
 				)
 				.addGap(5)
 				.addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
+						.addComponent( lblTamBloque )
+						.addComponent( txtTamBloque )	
+				)
+				.addGap(5)
+				.addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
 					.addComponent( cbxCifrar )
+					.addGap(5)
 					.addComponent( cbxDecifrar )	
 				)
 				.addGap(5)
@@ -161,7 +177,7 @@ public class UiAlicia extends JFrame{
 					.addComponent( cmbModos )
 					.addComponent( btnElegirLlave )
 				)
-				.addGap(10)
+				.addGap(15)
 				.addGroup(gl.createParallelGroup(GroupLayout.Alignment.BASELINE)
 					.addComponent( btnOperacion )
 					.addComponent( btnGenerar ) 	
@@ -228,6 +244,18 @@ public class UiAlicia extends JFrame{
 			JOptionPane.showMessageDialog(this,"Debes seleccionar un modo de operacion", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
+
+		if( txtTamBloque.getText().length() > 0){
+			try{
+				tamBloque = Integer.parseInt(txtTamBloque.getText());
+				if( tamBloque <= 0 || (tamBloque % 16) != 0){
+					tamBloque = DEF_TAM_BLOQUE;
+				}
+			}catch(NumberFormatException e) {
+				System.err.println("El tamanio de bloque que ingresaste no es un numero.");
+				tamBloque = DEF_TAM_BLOQUE;
+			}
+		}
 		
 		if( !llaveSeleccionada ){
 			JOptionPane.showMessageDialog(null,"Primero selecciona la llave", "Error", JOptionPane.ERROR_MESSAGE);
@@ -236,7 +264,7 @@ public class UiAlicia extends JFrame{
 
 		SecretKey llave = cd.loadKey( archivoLlave );
 		//System.out.println("K" + llave + " M " + modo + " Op " + operacion + " - " + archivo.getName());
-		if( cd.cifrarDescifrarImg( llave, modo, operacion, 16, archivo) ){
+		if( cd.cifrarDescifrarImg( llave, modo, operacion, tamBloque, archivo) ){
 			JOptionPane.showMessageDialog(null,"Imagen procesada", "Ok", JOptionPane.INFORMATION_MESSAGE);
 			return;
 		}else{
