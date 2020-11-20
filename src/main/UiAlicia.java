@@ -248,7 +248,7 @@ public class UiAlicia extends JFrame{
 		if( txtTamBloque.getText().length() > 0){
 			try{
 				tamBloque = Integer.parseInt(txtTamBloque.getText());
-				if( tamBloque <= 0 || (tamBloque % 16) != 0){
+				if( tamBloque <= 0 ){
 					tamBloque = DEF_TAM_BLOQUE;
 				}
 			}catch(NumberFormatException e) {
